@@ -123,6 +123,6 @@ add_custom_command(
     TARGET TestEngine POST_BUILD
 
     COMMAND  ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/sfml-build/lib/$<CONFIGURATION>"
-        $<TARGET_FILE_DIR:TestEngine>
+        "${PROJECT_SOURCE_DIR}/ThirdParty/sfml-build/lib/$<CONFIGURATION>/"
+        "${PROJECT_SOURCE_DIR}/bin/$<CONFIGURATION>/"
 )
