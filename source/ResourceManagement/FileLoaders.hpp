@@ -24,7 +24,7 @@ class IResourceFileLoader
 class DevelopmentFileLoader : public IResourceFileLoader
 {
     public:
-        std::regex GetFilePattern() override { return std::regex("^[A-z-/\\]+\.[A-z]+$"); }
+        std::regex GetFilePattern() override { return std::regex("^[A-z-/\\]+.[A-z]+$"); }
         bool UseRawFile() override { return true; }
         bool DiscardRawBufferAfterLoad() override { return true; }
         bool AddNullZero() override { return false; }

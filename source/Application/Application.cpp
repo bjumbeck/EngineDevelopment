@@ -5,6 +5,9 @@
 #include <SFML/Window/WindowStyle.hpp>
 #include <SFML/System/Clock.hpp>
 
+#include <imgui-SFML.h>
+#include <imgui.h>
+
 #include "Application.hpp"
 #include "Entity/Entity.hpp"
 
@@ -15,6 +18,7 @@
 #include "Components/RenderableComponent.hpp"
 #include "Components/MovementComponent.hpp"
 #include "Components/SteeringComponent.hpp"
+#include "Components/SteeringComponent.hpp"
 
 #include "EventManagement/EventManager.hpp"
 #include "Entity/EntityManager.hpp"
@@ -24,8 +28,6 @@
 #include "Systems/SystemManager.hpp"
 
 const sf::Time Application::timePerFrame = sf::seconds(1.0f / 60.0f);
-
-Application::~Application() = default;
 
 Application::Application()
     : window(sf::VideoMode(1920, 1080), "Testing Grounds", sf::Style::Close)
@@ -38,6 +40,12 @@ Application::Application()
     if (!resourceCache->Initialize())
     {
         // TODO: Move all this initialization outside of the constructor, it's limiting how errors can be handled.
+    }
+
+    // Initialize ImGUI windowing
+    if (!ImGui::SFML::Init(window))
+    {
+        // TODO: Logging and possible critical failure.
     }
 
     //=============================================================
@@ -71,8 +79,9 @@ Application::Application()
 
     // Test 3.1: Basic AI (Entity Steering) - Adding the Steering component will use steering behaviors to move an entity around with dynamic movement?
     ComponentPtr<SteeringComponent> steering = entityManager->assignComponent<SteeringComponent>(aiEntity.id());
-    steering->behaviorFlags |= BehaviorType::Seek;
-    steering->seekTarget = sf::Vector2f(400, 400);
+    steering->behaviorFlags |= BehaviorType::Arrive;
+    steering->arrivePosition = sf::Vector2f(400, 400);
+    steering->arriveDeceleration = SteeringComponent::Deceleration::Normal;
 
 
     // Feature TODO: Setup GUI for the engine using ImGui, though since there isn't a supported backend for sfml this will require
@@ -88,6 +97,11 @@ Application::Application()
     setupSystems();
 }
 
+Application::~Application()
+{
+    ImGui::SFML::Shutdown();
+}
+
 void Application::runApplication()
 {
     sf::Clock clock;
@@ -95,18 +109,21 @@ void Application::runApplication()
 
     while (window.isOpen())
     {
-        sf::Time deltaTime = clock.restart();
+        //ImGui::NewFrame();
+
+        const sf::Time deltaTime = clock.restart();
         timeSinceLastUpdate += deltaTime;
 
         while (timeSinceLastUpdate >= timePerFrame)
         {
-            timeSinceLastUpdate -= timePerFrame;
-
+            //ImGui::EndFrame();
             processSFMLEvents();
             updateFrame(timePerFrame);
+
+            timeSinceLastUpdate -= timePerFrame;
         }
 
-        renderFrame();
+        renderFrame(timePerFrame);
     }
 }
 
@@ -123,6 +140,9 @@ void Application::processSFMLEvents()
     sf::Event sfmlEvent;
     while (window.pollEvent(sfmlEvent))
     {
+        // The GUI get's first crack at the events
+        ImGui::SFML::ProcessEvent(sfmlEvent);
+
         switch (sfmlEvent.type)
         {
             case sf::Event::Closed:
@@ -144,9 +164,25 @@ void Application::updateFrame(const sf::Time& deltaTime)
     systemManager->updateAllSystems(deltaTime);
 }
 
-void Application::renderFrame()
+void Application::renderFrame(const sf::Time& deltaTime)
 {
-    window.clear(sf::Color::Black);
+    // TODO: GUI isn't working, has to deal with updating and rendering being separated and running at different timesteps.
+    // Might just move all GUI updating and rending to live strictly on the rendering side, though this is cheap fix and will cause problems
+    // if we multi-thread in the future.
+    ImGui::SFML::Update(window, deltaTime);
+
+    // TODO: Remove all this is just testing code
+    ImGui::Begin("Testing ImGUI"); // begin window
+    if (ImGui::ColorEdit3("Background color", color)) 
+    {
+        bgColor.r = static_cast<sf::Uint8>(color[0] * 255.f);
+        bgColor.g = static_cast<sf::Uint8>(color[1] * 255.f);
+        bgColor.b = static_cast<sf::Uint8>(color[2] * 255.f);
+    }
+    ImGui::End(); // end window
+
+    window.clear(bgColor);
     systemManager->getSystem<RenderSystem>()->render(*entityManager);
+    ImGui::SFML::Render(window);
     window.display();
 }

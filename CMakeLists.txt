@@ -94,6 +94,22 @@ FetchContent_Declare(ziplib
 
 FetchContent_MakeAvailable(sfml imgui spdlog ziplib)
 
+# ImGUI, handles GUI rendering for the whole project
+FetchContent_Declare(imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+)
+
+FetchContent_MakeAvailable(imgui)
+
+# ImGUI SFML, Temporary binding support to allow ImGUI to work through SFML. Will be replacing this in the future since it doesn't support multi viewports/docking and isn't being updated.
+FetchContent_Declare(imgui-sfml
+    GIT_REPOSITORY https://github.com/eliasdaler/imgui-sfml.git
+)
+set(IMGUI_DIR ${imgui_SOURCE_DIR})
+option(IMGUI_SFML_FIND_SFML "Use find_package to find SFML" OFF)
+
+FetchContent_MakeAvailable(imgui-sfml)
+
 
 
 # Dependency Linking and Header Setup
@@ -106,13 +122,19 @@ target_link_libraries(TestEngine
         sfml-window
 
         ziplib
+        
+    PUBLIC
+        ImGui-SFML::ImGui-SFML
 )
 
+# TODO: A lot of these can be moved to an install script which is how it should be done.
 include_directories(
     "${PROJECT_SOURCE_DIR}/source" 
     "${sfml_SOURCE_DIR}/include"
     "${PROJECT_SOURCE_DIR}/ThirdParty/spdlog-src/include/"
     "${PROJECT_SOURCE_DIR}/ThirdParty/ziplib-src/"
+    "${PROJECT_SOURCE_DIR}/ThirdParty/imgui-src/"
+    "${PROJECT_SOURCE_DIR}/ThirdParty/imgui-sfml-src/"
 )
 
 # Post Build 
@@ -124,5 +146,9 @@ add_custom_command(
 
     COMMAND  ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/ThirdParty/sfml-build/lib/$<CONFIGURATION>/"
+        "${PROJECT_SOURCE_DIR}/bin/$<CONFIGURATION>/"
+
+    COMMAND  ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/ThirdParty/imgui-sfml-build/$<CONFIGURATION>/"
         "${PROJECT_SOURCE_DIR}/bin/$<CONFIGURATION>/"
 )

@@ -27,12 +27,16 @@ class Application : private sf::NonCopyable
         
         void processSFMLEvents();
         void updateFrame(const sf::Time& deltaTime);
-        void renderFrame();
+        void renderFrame(const sf::Time& deltaTime);
 
     private:
         static const sf::Time timePerFrame;
 
         sf::RenderWindow window;
+
+        // TODO: Remove this later it's testing code
+        float color[3] = {0, 0, 0};
+        sf::Color bgColor;
 
         std::unique_ptr<ResourceCache> resourceCache;
 
