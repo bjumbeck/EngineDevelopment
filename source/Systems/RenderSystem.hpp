@@ -1,26 +1,20 @@
 #pragma once
 
-#include "System.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 
-namespace sf
-{
-    class RenderTarget;
-}
+#include "System.hpp"
 
 class RenderSystem : public System<RenderSystem>
 {
     public:
-        explicit RenderSystem(sf::RenderTarget& target);
+        explicit RenderSystem(sf::RenderWindow* target);
         
-        void configure(EventManager& eventManager) override;
-        void update(EntityManager& entityManager, EventManager& eventManager, const sf::Time& deltaTime) override;
+        void Configure(EventManager& eventManager) override;
+        void Update(EntityManager& entityManager, EventManager& eventManager, const sf::Time& deltaTime) override;
 
-        void render(EntityManager& entityManager);
+        void Render(EntityManager& entityManager);
 
     private:
-        sf::RenderTarget& renderTarget;
-        
-        #ifndef NDEBUG
+        sf::RenderWindow* renderWindow;
         bool debugDraw;
-        #endif
 };

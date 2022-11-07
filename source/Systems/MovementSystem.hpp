@@ -12,8 +12,8 @@ class MovementSystem : public System<MovementSystem>
         MovementSystem() = default;
 
         // System overrides
-        void configure(EventManager& eventManager) override;
-        void update(EntityManager& entityManager, EventManager& eventManager, const sf::Time& deltaTime) override;
+        void Configure(EventManager& eventManager) override;
+        void Update(EntityManager& entityManager, EventManager& eventManager, const sf::Time& deltaTime) override;
 
     private:
         // Steering Functionality

@@ -4,10 +4,10 @@
 #include "Components/TransformableComponent.hpp"
 #include "Components/MovementComponent.hpp"
 
-void MovementSystem::configure(EventManager& eventManager)
+void MovementSystem::Configure(EventManager& eventManager)
 {}
 
-void MovementSystem::update(EntityManager& entityManager, EventManager& eventManager, const sf::Time& deltaTime)
+void MovementSystem::Update(EntityManager& entityManager, EventManager& eventManager, const sf::Time& deltaTime)
 {
     ComponentPtr<MovementComponent> movementComp;
     ComponentPtr<TransformableComponent> transComp;
