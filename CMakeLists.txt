@@ -30,6 +30,7 @@ set(HEADERS
     source/ResourceManagement/ResourceCache.hpp
     source/ResourceManagement/ResourceContainers.hpp
     source/ResourceManagement/ResourceHandle.hpp
+    source/Systems/GuiSystem.hpp
     source/Systems/MovementSystem.hpp
     source/Systems/RenderSystem.hpp
     source/Systems/System.hpp
@@ -47,6 +48,7 @@ set(SRCS
     source/ResourceManagement/ResourceHandle.cpp
     source/ResourceManagement/ResourceCache.cpp
     source/ResourceManagement/ResourceContainers.cpp
+    source/Systems/GuiSystem.cpp
 )
 
 # Project Structure
@@ -103,7 +105,7 @@ FetchContent_MakeAvailable(imgui)
 
 # ImGUI SFML, Temporary binding support to allow ImGUI to work through SFML. Will be replacing this in the future since it doesn't support multi viewports/docking and isn't being updated.
 FetchContent_Declare(imgui-sfml
-    GIT_REPOSITORY https://github.com/eliasdaler/imgui-sfml.git
+    GIT_REPOSITORY https://github.com/bjumbeck/imgui-sfml.git
 )
 set(IMGUI_DIR ${imgui_SOURCE_DIR})
 option(IMGUI_SFML_FIND_SFML "Use find_package to find SFML" OFF)

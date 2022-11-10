@@ -5,19 +5,20 @@
 #include <SFML/Window/WindowStyle.hpp>
 #include <SFML/System/Clock.hpp>
 
-#include <imgui-SFML.h>
 #include <imgui.h>
+#include <imgui-SFML.h>
 
 #include "Application.hpp"
 #include "Entity/Entity.hpp"
 
+#include "Systems/SystemManager.hpp"
 #include "Systems/RenderSystem.hpp"
 #include "Systems/MovementSystem.hpp"
+#include "Systems/GuiSystem.hpp"
 
 #include "Components/TransformableComponent.hpp"
 #include "Components/RenderableComponent.hpp"
 #include "Components/MovementComponent.hpp"
-#include "Components/SteeringComponent.hpp"
 #include "Components/SteeringComponent.hpp"
 
 #include "EventManagement/EventManager.hpp"
@@ -25,21 +26,22 @@
 #include "ResourceManagement/ResourceCache.hpp"
 #include "ResourceManagement/ResourceContainers.hpp"
 #include "ResourceManagement/ResourceHandle.hpp"
-#include "Systems/SystemManager.hpp"
 
 const sf::Time Application::timePerFrame = sf::seconds(1.0f / 60.0f);
 
 Application::Application()
     : window(sf::VideoMode(1920, 1080), "Testing Grounds", sf::Style::Close)
-    , resourceCache(std::make_unique<ResourceCache>(10, new ZipResourceContainer("Assets.zip"))) // Cache will take ownership
     , eventManager(std::make_unique<EventManager>())
     , entityManager(std::make_unique<EntityManager>(*eventManager))
     , systemManager(std::make_unique<SystemManager>(*entityManager, *eventManager))
+    , resourceCache(std::make_unique<ResourceCache>(10, new ZipResourceContainer("Assets.zip")))
 {
+    // TODO: Move all this initialization outside of the constructor, it's limiting how errors can be handled.
+
     // Initialize the resource cache
     if (!resourceCache->Initialize())
     {
-        // TODO: Move all this initialization outside of the constructor, it's limiting how errors can be handled.
+        
     }
 
     // Initialize ImGUI windowing
@@ -55,8 +57,7 @@ Application::Application()
     // Entities represent primarily just a unique ID and that is it.
     // All components are housed in their own separate memory pools 
     // (Based on component families) inside of EntityManager.
-    Entity aiEntity = entityManager->createEntity();
-    Entity playerEntity = entityManager->createEntity();
+    aiEntity = entityManager->createEntity();
 
     // Test 1: Resource Loading - Able to successfully load a png sprite image from our zip file?
 
@@ -80,15 +81,7 @@ Application::Application()
     // Test 3.1: Basic AI (Entity Steering) - Adding the Steering component will use steering behaviors to move an entity around with dynamic movement?
     ComponentPtr<SteeringComponent> steering = entityManager->assignComponent<SteeringComponent>(aiEntity.id());
     steering->behaviorFlags |= BehaviorType::Arrive;
-    steering->arrivePosition = sf::Vector2f(400, 400);
     steering->arriveDeceleration = SteeringComponent::Deceleration::Normal;
-
-
-    // Feature TODO: Setup GUI for the engine using ImGui, though since there isn't a supported backend for sfml this will require
-    // either 1) Writing a new SFML backend for ImGUI that uses both SFML rendering and windowing 2) Switching rendering from SFML to OpenGL
-    // and use the ImGUI OpenGL backend. #1 isn't ideal since it would require constantly keeping our code synced and updated whenever new changes
-    // roll out. Whereas if we go with #2 we can piggyback on the ImGUI implementation that they keep up to date and only have to interface it with
-    // SFML windowing which shouldn't require maintence since we can hook into the opengl render target directly.
 
     //=============================================================
     // END Testing Code / Feature Demoing
@@ -109,14 +102,13 @@ void Application::runApplication()
 
     while (window.isOpen())
     {
-        //ImGui::NewFrame();
+        ImGui::NewFrame();
 
         const sf::Time deltaTime = clock.restart();
         timeSinceLastUpdate += deltaTime;
 
         while (timeSinceLastUpdate >= timePerFrame)
         {
-            //ImGui::EndFrame();
             processSFMLEvents();
             updateFrame(timePerFrame);
 
@@ -129,8 +121,9 @@ void Application::runApplication()
 
 void Application::setupSystems()
 {
-    systemManager->addSystem<RenderSystem>(window);
+    systemManager->addSystem<RenderSystem>(&window);
     systemManager->addSystem<MovementSystem>();
+    systemManager->addSystem<GuiSystem>(&window);
 
     systemManager->configure();
 }
@@ -141,7 +134,7 @@ void Application::processSFMLEvents()
     while (window.pollEvent(sfmlEvent))
     {
         // The GUI get's first crack at the events
-        ImGui::SFML::ProcessEvent(sfmlEvent);
+        ImGui::SFML::ProcessEvent(window, sfmlEvent);
 
         switch (sfmlEvent.type)
         {
@@ -161,28 +154,18 @@ void Application::processSFMLEvents()
 
 void Application::updateFrame(const sf::Time& deltaTime)
 {
+    // TODO: Remove Testing Code
+    mousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+    entityManager->getComponent<SteeringComponent>(aiEntity.id())->arrivePosition = mousePosition;
+
     systemManager->updateAllSystems(deltaTime);
 }
 
 void Application::renderFrame(const sf::Time& deltaTime)
 {
-    // TODO: GUI isn't working, has to deal with updating and rendering being separated and running at different timesteps.
-    // Might just move all GUI updating and rending to live strictly on the rendering side, though this is cheap fix and will cause problems
-    // if we multi-thread in the future.
-    ImGui::SFML::Update(window, deltaTime);
-
-    // TODO: Remove all this is just testing code
-    ImGui::Begin("Testing ImGUI"); // begin window
-    if (ImGui::ColorEdit3("Background color", color)) 
-    {
-        bgColor.r = static_cast<sf::Uint8>(color[0] * 255.f);
-        bgColor.g = static_cast<sf::Uint8>(color[1] * 255.f);
-        bgColor.b = static_cast<sf::Uint8>(color[2] * 255.f);
-    }
-    ImGui::End(); // end window
 
     window.clear(bgColor);
-    systemManager->getSystem<RenderSystem>()->render(*entityManager);
-    ImGui::SFML::Render(window);
+    systemManager->getSystem<RenderSystem>()->Render(*entityManager);
+    systemManager->getSystem<GuiSystem>()->Render(*entityManager, *eventManager);
     window.display();
 }

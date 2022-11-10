@@ -4,6 +4,8 @@
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include "Entity/Entity.hpp"
+
 class ResourceCache;
 class EventManager;
 class EntityManager;
@@ -18,7 +20,8 @@ class Application : private sf::NonCopyable
         void operator=(const Application&) = delete;
 
         void runApplication();
-        const sf::RenderWindow& getWindow() const { return window; } 
+
+        sf::RenderWindow* GetWindow() { return &window; } 
 
     private:
         Application();
@@ -31,18 +34,17 @@ class Application : private sf::NonCopyable
 
     private:
         static const sf::Time timePerFrame;
-
         sf::RenderWindow window;
-
-        // TODO: Remove this later it's testing code
-        float color[3] = {0, 0, 0};
         sf::Color bgColor;
-
-        std::unique_ptr<ResourceCache> resourceCache;
 
         // Do not change the ordering of these
         // will mess up the constructor if you do.
         std::unique_ptr<EventManager> eventManager;
         std::unique_ptr<EntityManager> entityManager;
         std::unique_ptr<SystemManager> systemManager;
+        std::unique_ptr<ResourceCache> resourceCache;
+
+        // Testing code
+        Entity aiEntity;
+        sf::Vector2f mousePosition;
 };
