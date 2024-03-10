@@ -1,1 +1,1 @@
-[![CMake](https://github.com/bjumbeck/EngineDevelopment/actions/workflows/cmake.yml/badge.svg?branch=develop)](https://github.com/bjumbeck/EngineDevelopment/actions/workflows/cmake.yml)
+A hobby 2D/3D Game Engine that I have been working on in my free time, though lately haven't had as much time as I would like.
