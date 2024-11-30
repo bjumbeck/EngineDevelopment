@@ -64,7 +64,7 @@ Application::Application()
     // NOTE: This is very sloppy and is wasting RAM by having to load the asset into memory with the cache and resource handle, then copy that same data over into a
     // sf::Texture which we then carry around in places like RenderableComponent. Though I am planning to ditch using SFML for rendering in the near future and will have to rewrite all
     // rendering code to use pure OpenGL, DirectX or maybe even Vulkan. So will leave it as it is right now.
-    auto testSpriteHandle = resourceCache->GetResourceHandle("Textures/TestSprite.png");
+    auto testSpriteHandle = resourceCache->GetResourceHandle("Assets/Textures/TestSprite.png");
     sf::Texture testSpriteTexture;
     testSpriteTexture.loadFromMemory(testSpriteHandle->GetBuffer(), testSpriteHandle->GetSize());
 

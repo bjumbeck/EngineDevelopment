@@ -80,7 +80,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY "https://github.com/ocornut/imgui.git"
-    GIT_TAG        "docking"
+    GIT_TAG        "v1.89"
 )
 
 # SpdLog, Header only fast C++ logging
@@ -96,20 +96,13 @@ FetchContent_Declare(ziplib
 
 FetchContent_MakeAvailable(sfml imgui spdlog ziplib)
 
-# ImGUI, handles GUI rendering for the whole project
-FetchContent_Declare(imgui
-    GIT_REPOSITORY https://github.com/ocornut/imgui.git
-)
-
-FetchContent_MakeAvailable(imgui)
-
 # ImGUI SFML, Temporary binding support to allow ImGUI to work through SFML. Will be replacing this in the future since it doesn't support multi viewports/docking and isn't being updated.
 FetchContent_Declare(imgui-sfml
-    GIT_REPOSITORY https://github.com/bjumbeck/imgui-sfml.git
+    GIT_REPOSITORY  https://github.com/SFML/imgui-sfml.git
+    GIT_TAG         "2.6.x"
 )
 set(IMGUI_DIR ${imgui_SOURCE_DIR})
 option(IMGUI_SFML_FIND_SFML "Use find_package to find SFML" OFF)
-
 FetchContent_MakeAvailable(imgui-sfml)
 
 
@@ -143,14 +136,16 @@ include_directories(
 ########################################
 
 # Copy SFML dlls into our build directory (Debug only atm)
+# TODO: Add configuration subfolders and also automatically ZIP up the assets folder and put it
+# in the correct build folder.
 add_custom_command(
     TARGET TestEngine POST_BUILD
 
     COMMAND  ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/ThirdParty/sfml-build/lib/$<CONFIGURATION>/"
-        "${PROJECT_SOURCE_DIR}/bin/$<CONFIGURATION>/"
+        "${PROJECT_SOURCE_DIR}/ThirdParty/sfml-build/lib/"
+        "${PROJECT_SOURCE_DIR}/bin/"
 
     COMMAND  ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/ThirdParty/imgui-sfml-build/$<CONFIGURATION>/"
-        "${PROJECT_SOURCE_DIR}/bin/$<CONFIGURATION>/"
+        "${PROJECT_SOURCE_DIR}/ThirdParty/imgui-sfml-build/"
+        "${PROJECT_SOURCE_DIR}/bin/"
 )
