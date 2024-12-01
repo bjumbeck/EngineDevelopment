@@ -8,7 +8,7 @@
 template <typename SystemType>
 void SystemManager::addSystem(std::shared_ptr<SystemType> system)
 {
-    systems.insert(std::make_pair(SystemType::family(), system));
+    systems.insert(std::make_pair(SystemType::Family(), system));
 }
 
 template <typename SystemType, typename ... Args>
@@ -23,7 +23,7 @@ std::shared_ptr<SystemType> SystemManager::addSystem(Args&& ... args)
 template <typename SystemType>
 std::shared_ptr<SystemType> SystemManager::getSystem()
 {
-    auto iter = systems.find(SystemType::family());
+    auto iter = systems.find(SystemType::Family());
     assert(iter != systems.end()); // TODO: Replace with a soft fail and logging 
 
     return std::static_pointer_cast<SystemType>(iter->second); // TODO: Is the cast needed here?
@@ -43,7 +43,7 @@ inline void SystemManager::updateAllSystems(const sf::Time& deltaTime)
 
     for (auto& pair : systems)
     {
-        pair.second->update(entityManager, eventManager, deltaTime);
+        pair.second->Update(entityManager, eventManager, deltaTime);
     }
 }
 
@@ -51,7 +51,7 @@ inline void SystemManager::configure()
 {
     for (auto& pair : systems)
     {
-        pair.second->configure(eventManager);
+        pair.second->Configure(eventManager);
     }
 
     isInitialized = true;
