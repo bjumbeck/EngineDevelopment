@@ -12,6 +12,7 @@ include(CMakePrintHelpers)
 ########################################
 set(HEADERS
     source/Application/Application.hpp
+    source/Application/IApplication.hpp
     source/Components/Component.hpp
     source/Components/MovementComponent.hpp
     source/Components/RenderableComponent.hpp
